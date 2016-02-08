@@ -1,0 +1,36 @@
+<html>
+<head>
+<script src="static/jquery-1.12.0.min.js">
+
+</script>
+</head>
+
+<body>
+<p id="demo" onclick="myFunction()">Click me to change my HTML content (innerHTML).</p>
+
+
+
+<script type="application/javascript">
+    document.getElementById("demo").innerHTML = "Paragraph changed!";
+    var source = new EventSource('subscribe');
+    source.onopen = function () {
+        //connectionOpen(true);
+    };
+
+    source.onerror = function () {
+        //connectionOpen(false);
+    };
+    source.addEventListener("counter", function(e) {
+        console.log(e.data);
+        var newElement = document.createElement("li");
+
+        newElement.innerHTML = "message: " + e.data;
+        newElement.innerHTML = "message: " + e.id;
+        document.getElementById("demo").innerHTML = e.data;
+    }, false);
+</script>
+
+
+</body>
+
+</html>
