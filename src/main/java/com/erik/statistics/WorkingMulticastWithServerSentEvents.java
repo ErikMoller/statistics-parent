@@ -21,19 +21,16 @@ public class WorkingMulticastWithServerSentEvents {
     public static void main(String[] args) throws Exception {
         Data data = new Data();
         TransformablePublisher<Object> multicast = Streams.multicast(subscriber -> {
-            new Thread() {
-                public void run() {
-                    try {
+
                         while (!data.isClosed()) {
-                            subscriber.onNext(data.getData());
+                            try {
+                                subscriber.onNext(data.getData());
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    subscriber.onComplete();
-                }
-            }.start();
-        });;
+
+        }).gate(Runnable::run);
         RatpackServer.start(s ->  s.serverConfig(c -> c.baseDir(BaseDir.find()))
                 .handlers(chain ->
                         chain.prefix("static",chain1-> chain1.fileSystem("assets", Chain::files))
