@@ -46,6 +46,9 @@ public class WorkingMulticastWithServerSentEvents {
                                     ctx.getResponse().status(200).send();
                         }).get("start",ctx -> {
                             ctx.getResponse().contentType("html").sendFile(Paths.get("src/main/resources/html/", "index.html"));
+                        }).get("search/:searchString", ctx -> {
+                            String searchString = ctx.getPathTokens().get("searchString");
+                            ctx.render("Result from server: " + searchString);
                         }).get("learnAngular", ctx -> {
                             ctx.getResponse().contentType("html").sendFile(Paths.get("src/main/resources/html/", "learnAngular.html"));
                         })));

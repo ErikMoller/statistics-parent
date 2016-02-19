@@ -8,23 +8,33 @@
 
     <p><textarea ng-model="searchText" cols="40" rows="10"></textarea></p>
 
-    <p>Number of characters left: <span>{{numberOfChars}}</span>
+    <p>Number of characters: <span>{{numberOfChars}}</span></p>
+    <p><span>{{searchResult}}</span></p>
 </div>
 
 <script>
     var app = angular.module('myApp', []);
 
-    app.controller('myCtrl', function($scope) {
+    app.controller('myCtrl', function($scope,$http) {
         $scope.msg = {};
         $scope.searchText = "";
         $scope.numberOfChars = 0;
+        $scope.searchResult = "";
 
 
-        $scope.$watch('searchText', function(oldValue) {
+        $scope.$watch('searchText', function() {
             $scope.numberOfChars = $scope.searchText.length;
             counter = $scope.numberOfChars;
             if (counter > 1) {
                 console.log("search!");
+                $http.get("search/"+$scope.searchText)
+                        .then(function(response) {
+                            console.log("Searched for: " + response.data);
+                            $scope.searchResult = response.data;
+                        });
+
+            } else {
+                $scope.searchResult = "";
             }
         });
 
