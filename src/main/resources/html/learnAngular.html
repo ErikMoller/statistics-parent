@@ -5,6 +5,10 @@
 <body>
 <div ng-app="myApp" ng-controller="myCtrl">
     <h1>Receiving push msg: "{{msg}}"</h1>
+
+    <p><textarea ng-model="searchText" cols="40" rows="10"></textarea></p>
+
+    <p>Number of characters left: <span>{{numberOfChars}}</span>
 </div>
 
 <script>
@@ -12,6 +16,17 @@
 
     app.controller('myCtrl', function($scope) {
         $scope.msg = {};
+        $scope.searchText = "";
+        $scope.numberOfChars = 0;
+
+
+        $scope.$watch('searchText', function(oldValue) {
+            $scope.numberOfChars = $scope.searchText.length;
+            counter = $scope.numberOfChars;
+            if (counter > 1) {
+                console.log("search!");
+            }
+        });
 
         // handles the callback from the received event
         var handleCallback = function (msg) {
@@ -22,6 +37,7 @@
 
         var source = new EventSource('subscribe');
         source.addEventListener('counter', handleCallback, false);
+
     });
 </script>
 </body>
