@@ -1,6 +1,5 @@
 package com.erik.statistics;
 
-import ratpack.func.Action;
 import ratpack.handling.Chain;
 import ratpack.handling.Handler;
 import ratpack.server.BaseDir;
@@ -20,6 +19,7 @@ import static ratpack.sse.ServerSentEvents.serverSentEvents;
  * Created by erimol on 2016-02-06.
  */
 public class WorkingMulticastWithServerSentEvents {
+
     private static Data data = new Data();
     private static TransformablePublisher<Object> multicast;
 
