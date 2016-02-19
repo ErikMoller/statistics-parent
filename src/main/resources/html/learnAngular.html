@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<script src="static/angular.min.js">
+</script>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl">
+    <h1>Receiving push msg: "{{msg}}"</h1>
+</div>
+
+<script>
+    var app = angular.module('myApp', []);
+
+    app.controller('myCtrl', function($scope) {
+        $scope.msg = {};
+
+        // handles the callback from the received event
+        var handleCallback = function (msg) {
+            $scope.$apply(function () {
+                $scope.msg = msg.data;
+            });
+        }
+
+        var source = new EventSource('subscribe');
+        source.addEventListener('counter', handleCallback, false);
+    });
+</script>
+</body>
+</html>
