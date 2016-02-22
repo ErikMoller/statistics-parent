@@ -1,7 +1,13 @@
 package com.erik.statistics.service;
 
+import com.erik.statistics.domain.NewDocument;
+import ratpack.exec.Promise;
+import ratpack.form.Form;
 import ratpack.handling.Chain;
+import ratpack.handling.Context;
 import ratpack.handling.Handler;
+import ratpack.http.TypedData;
+import ratpack.jackson.Jackson;
 import ratpack.server.BaseDir;
 import ratpack.server.RatpackServer;
 import ratpack.sse.ServerSentEvents;
@@ -12,7 +18,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Function;
@@ -33,7 +38,11 @@ public class WebServiceEndpoint {
                 .handlers(chain -> {
                     Chain chainBuilder = chain.prefix("static", chain1 -> chain1.fileSystem("assets", Chain::files));
                     for (Map.Entry<String, Handler> entry : handlers.entrySet()) {
-                        chainBuilder.get(entry.getKey(),entry.getValue());
+                        if (entry.getKey().equals("newDocument")) {
+                            chainBuilder.post(entry.getKey(),entry.getValue());
+                        } else {
+                            chainBuilder.get(entry.getKey(),entry.getValue());
+                        }
                     }
                 }
         ));
@@ -60,8 +69,13 @@ public class WebServiceEndpoint {
             return this;
         }
 
-        public Builder resetService(RestService restService) {
-            handlers.putAll(restService.getHandlers());
+        public Builder restGetService(RestGetService restGetService) {
+            handlers.putAll(restGetService.getHandlers());
+            return this;
+        }
+
+        public Builder restPostService(RestPostService restPostService) {
+            handlers.putAll(restPostService.getHandlers());
             return this;
         }
     }
@@ -73,11 +87,11 @@ public class WebServiceEndpoint {
 
 
 
-    public static class RestService<T> implements  HandlerMapping {
+    public static class RestGetService<T> implements  HandlerMapping {
         private final Function<String,Object> action;
         private final String path;
 
-        public RestService(String path,Function<String, Object> action) {
+        public RestGetService(String path, Function<String, Object> action) {
             this.action = requireNonNull(action, "action");
             this.path = requireNonNull(path, "path");
         }
@@ -93,7 +107,7 @@ public class WebServiceEndpoint {
         }
 
         public static PathBuilder newRestService() {
-            return path -> action -> new RestService(path,action);
+            return path -> action -> new RestGetService(path,action);
         }
 
         @FunctionalInterface
@@ -103,9 +117,43 @@ public class WebServiceEndpoint {
 
         @FunctionalInterface
         public interface ActionBuilder {
-            RestService action(Function<String,Object> action);
+            RestGetService action(Function<String,Object> action);
         }
     }
+
+    public static class RestPostService<T> implements  HandlerMapping {
+        private final Function<Context,Promise<String>> action;
+        private final String path;
+
+        public RestPostService(String path, Function<Context, Promise<String>> action) {
+            this.action = requireNonNull(action, "action");
+            this.path = requireNonNull(path, "path");
+        }
+
+        @Override
+        public Map<String, Handler> getHandlers() {
+            Map<String,Handler> handlerMapping = new HashMap<>();
+            handlerMapping.put(path,ctx -> {
+                ctx.render(action.apply(ctx));
+            });
+            return handlerMapping;
+        }
+
+        public static PathBuilder newRestService() {
+            return path -> action -> new RestPostService(path,action);
+        }
+
+        @FunctionalInterface
+        public interface PathBuilder {
+            ActionBuilder path(String path);
+        }
+
+        @FunctionalInterface
+        public interface ActionBuilder {
+            RestPostService action(Function<Context,Promise<String>> action);
+        }
+    }
+
 
     public static class Multicast implements HandlerMapping {
         private final String publishUrl;

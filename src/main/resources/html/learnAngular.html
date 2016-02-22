@@ -51,7 +51,10 @@
         $scope.createDocument = function() {
             var data = $scope.newDocument;
             $scope.newDocument = "";
-            console.log("post this to site: " + data);
+            $http.post("newDocument",{documentData:data})
+                    .then(function(response) {
+                        console.log("Added new document with data: " + response.data);
+                    });
         }
 
         // handles the callback from the received event
