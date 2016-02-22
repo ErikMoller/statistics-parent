@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Function;
@@ -72,11 +73,11 @@ public class WebServiceEndpoint {
 
 
 
-    public static class RestService implements  HandlerMapping {
-        private final Function<String,String> action;
+    public static class RestService<T> implements  HandlerMapping {
+        private final Function<String,Object> action;
         private final String path;
 
-        public RestService(String path,Function<String, String> action) {
+        public RestService(String path,Function<String, Object> action) {
             this.action = requireNonNull(action, "action");
             this.path = requireNonNull(path, "path");
         }
@@ -102,7 +103,7 @@ public class WebServiceEndpoint {
 
         @FunctionalInterface
         public interface ActionBuilder {
-            RestService action(Function<String,String> action);
+            RestService action(Function<String,Object> action);
         }
     }
 
